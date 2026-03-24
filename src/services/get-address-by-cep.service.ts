@@ -1,7 +1,8 @@
 import axios from 'axios';
+import { Endereco } from '../types/lead.type';
 // const axios = require('axios').default
 
-export default async function getAddressByCepService(cep) {
+export default async function getAddressByCepService(cep: string): Promise<Endereco | null> {
     try {
         // Precisamos consultar o CEP em uma API para descobrir os demais dados de endereço
         // URL GET https://viacep.com.br/ws/{{cep}}/json
@@ -11,7 +12,9 @@ export default async function getAddressByCepService(cep) {
         // Reject (rejeitada) - durante o processo de execução da promise, foi lançada uma Exception/Erro
         const resposta = await axios.get(`https://viacep.com.br/ws/${cep}/json`);
 
-        if (resposta.data?.erro) return
+        if (resposta.data?.erro) {
+            throw new Error('Não foi possível encontrar o endereço pelo CEP informado')
+        }
 
         return {
             cep: cep,

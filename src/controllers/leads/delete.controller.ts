@@ -1,6 +1,7 @@
-import leads from "../../database/leads.db.js";
+import { Request, Response } from "express";
+import leads from "../../database/leads.db";
 
-export default function deleteLeadController(req, res) {
+export function deleteLeadController(req: Request, res: Response): void {
     // 1. Input
     const { id } = req.params;
 
@@ -9,19 +10,21 @@ export default function deleteLeadController(req, res) {
     const indexEncontrado = leads.findIndex((lead) => `${lead.id}` === id);
 
     if (indexEncontrado === -1) {
-        return res.status(404).json({
+        res.status(404).json({
             success: false,
             message: "Lead não encontrado pelo ID informado"
         });
+        return
     }
 
     const [leadExcluido] = leads.splice(indexEncontrado, 1);
 
 
     // 3. Output
-    return res.status(200).json({
+    res.status(200).json({
         success: true,
         message: "Lead deletado com sucesso",
         result: leadExcluido
     });
+    return
 }

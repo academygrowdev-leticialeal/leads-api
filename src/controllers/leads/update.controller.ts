@@ -1,8 +1,10 @@
-import leads from "../../database/leads.db.js";
-import getAddressByCep from "../../services/get-address-by-cep.service.js";
+import { Request, Response } from "express";
+import leads from "../../database/leads.db";
+import { ILead } from "../../types/lead.type";
+import getAddressByCepService from "../../services/get-address-by-cep.service";
 
 
-export default async function updateLeadController(req, res) {
+export async function updateLeadController(req: Request, res: Response): Promise<void> {
     // 1. Input
     const { id } = req.params;
     const { nomeCompleto, email, telefone, cep } = req.body || {};
@@ -11,16 +13,28 @@ export default async function updateLeadController(req, res) {
     // 2. Processing
     const indexEncontrado = leads.findIndex((lead) => `${lead.id}` === id);
 
+    // garante que é um indice válido
     if (indexEncontrado === -1) {
-        return res.status(404).json({
+        res.status(404).json({
             success: false,
             message: "Lead não encontrado pelo ID informado"
         });
+        return
     }
 
+    if (typeof leads[indexEncontrado] === 'undefined') {
+        res.status(404).json({
+            success: false,
+            message: "Lead não encontrado pelo ID informado"
+        });
+        return
+    }
+
+    // Implicito? TS apartir da inferencia faz a tipagem da variavel
     const registroAtual = { ...leads[indexEncontrado] };
 
-    let lead = {
+    // Explicita? O dev que determina o tipo na declaração da variavel ou função
+    let lead: ILead = {
         id: registroAtual.id,
         nomeCompleto: nomeCompleto || registroAtual.nomeCompleto,
         email: email || registroAtual.email,
@@ -29,13 +43,14 @@ export default async function updateLeadController(req, res) {
     };
 
     if (cep) {
-        const endereco = await getAddressByCep(cep);
+        const endereco = await getAddressByCepService(cep);
 
         if (!endereco) {
-            return res.status(503).json({
+            res.status(503).json({
                 success: false,
                 message: "Os dados de endereço não puderam ser encontrados. Tente novamente mais tarde"
             })
+            return
         }
 
         lead.endereco = { ...endereco }
@@ -45,9 +60,10 @@ export default async function updateLeadController(req, res) {
 
 
     // 3. Output
-    return res.status(200).json({
+    res.status(200).json({
         success: true,
         message: "Lead atualizado com sucesso",
         result: lead
     });
+    return
 }

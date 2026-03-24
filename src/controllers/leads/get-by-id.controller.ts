@@ -1,6 +1,7 @@
-import leads from "../../database/leads.db.js";
+import { Request, Response } from "express";
+import leads from "../../database/leads.db";
 
-export default function getByIdLeadController(req, res) {
+export function getByIdLeadController(req: Request, res: Response): void {
     // 1. Input
     const { id } = req.params;
 
@@ -9,17 +10,19 @@ export default function getByIdLeadController(req, res) {
     const leadEncontrado = leads.find((lead) => `${lead.id}` === id);
 
     if (!leadEncontrado) {
-        return res.status(404).json({
+        res.status(404).json({
             success: false,
             message: "Lead não encontrado pelo ID informado"
         });
+        return
     }
 
 
     // 3. Output
-    return res.status(200).json({
+    res.status(200).json({
         success: true,
         message: "Lead encontrado com sucesso",
         result: leadEncontrado
     });
+    return
 }

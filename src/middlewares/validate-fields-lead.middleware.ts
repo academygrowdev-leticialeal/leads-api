@@ -1,5 +1,7 @@
+import { Request, Response, NextFunction } from 'express';
+
 // Definição dos middlewares
-export function validateLeadRequiredFields(req, res, next) {
+export function validateLeadRequiredFields(req: Request, res: Response, next: NextFunction) {
     const { nomeCompleto, email, telefone, cep } = req.body || {};
 
     const errors = [];
@@ -20,7 +22,7 @@ export function validateLeadRequiredFields(req, res, next) {
     return next();
 }
 
-export function validateLeadTypeFields(req, res, next) {
+export function validateLeadTypeFields(req: Request, res: Response, next: NextFunction) {
     const { nomeCompleto, email, telefone, cep } = req.body || {};
 
     const errors = [];
@@ -52,7 +54,7 @@ export function validateLeadTypeFields(req, res, next) {
     return next();
 }
 
-export function validateLeadFormatFields(req, res, next) {
+export function validateLeadFormatFields(req: Request, res: Response, next: NextFunction) {
     const { nomeCompleto, email, telefone, cep } = req.body || {};
 
     // 2 - Processing

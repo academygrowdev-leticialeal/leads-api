@@ -1,7 +1,9 @@
-import leads from '../../database/leads.db.js';
-import getAddressByCep from '../../services/get-address-by-cep.service.js';
+import { Request, Response } from "express";
+import leads from "../../database/leads.db";
+import { ILead } from "../../types/lead.type";
+import getAddressByCepService from "../../services/get-address-by-cep.service";
 
-export default async function createLeadController(req, res) {
+export async function createLeadController(req: Request, res: Response): Promise<void> {
     try {
 
         // 1 - Input
@@ -10,30 +12,33 @@ export default async function createLeadController(req, res) {
         // 2 - Processing
         // Regra 1: Não é possível ter emails duplicados
         if (leads.some((lead) => lead.email === email)) {
-            return res.status(409).json({
+            res.status(409).json({
                 success: false,
                 message: "E-mail já registrado no sistema."
             })
+            return
         }
 
         // Regra 2: Não é possível ter telefones duplicados
         if (leads.some((lead) => lead.telefone === telefone)) {
-            return res.status(409).json({
+            res.status(409).json({
                 success: false,
                 message: "Telefone já registrado no sistema."
             })
+            return
         }
 
-        const endereco = await getAddressByCep(cep);
+        const endereco = await getAddressByCepService(cep);
 
         if (!endereco) {
-            return res.status(503).json({
+            res.status(503).json({
                 success: false,
                 message: "Os dados de endereço não puderam ser encontrados. Tente novamente mais tarde"
             })
+            return
         }
 
-        const novoLead = {
+        const novoLead: ILead = {
             id: new Date().getTime(),
             nomeCompleto,
             email,
@@ -45,18 +50,20 @@ export default async function createLeadController(req, res) {
 
 
         // 3 - Output
-        return res.status(201).json({
+        res.status(201).json({
             success: true,
             message: "Lead registrado com sucesso",
             result: novoLead
         })
+        return
     } catch (error) {
         console.error(error);
 
-        return res.status(500).json({
+        res.status(500).json({
             success: false,
             message: "Um inesperado aconteceu. Entre em contato com o time de suporte."
         })
+        return
     }
 }
 
